@@ -1,7 +1,3 @@
-<<<<<<< HEAD
 [build]
-  publish = "frontend"
-=======
-[build]
-  publish = "frontend"
->>>>>>> edd67e225a3e2d9ca502b2a11af35ed207e6d583
+  command = "echo 'Sem build command'"
+  publish = "."
