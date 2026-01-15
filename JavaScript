@@ -1,0 +1,57 @@
+const apiUrl = 'https://URL-DO-SEU-BACKEND.onrender.com/api/dados-historicos';
+const ctx = document.getElementById('umidade-chart' ).getContext('2d');
+let chart;
+
+function atualizarGrafico(dados) {
+    const labels = dados.map(d => new Date(d.data_hora).toLocaleTimeString('pt-BR'));
+    const valores = dados.map(d => d.valor);
+
+    if (chart) {
+        chart.destroy();
+    }
+
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Umidade do Solo (Valor Bruto)',
+                data: valores,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        }
+    });
+}
+
+function atualizarUmidadeAtual(dados) {
+    const umidadeAtualElement = document.getElementById('umidade-atual');
+    if (dados.length > 0) {
+        const ultimoValor = dados[dados.length - 1].valor;
+        const valorMaximoSeco = 3200;
+        const valorMinimoMolhado = 1500;
+        let percentual = 100 - ((ultimoValor - valorMinimoMolhado) / (valorMaximoSeco - valorMinimoMolhado)) * 100;
+        percentual = Math.max(0, Math.min(100, percentual));
+        umidadeAtualElement.textContent = `${percentual.toFixed(0)}%`;
+    } else {
+        umidadeAtualElement.textContent = 'Nenhum dado recebido.';
+    }
+}
+
+async function buscarDados() {
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error('Erro ao buscar dados da API');
+        }
+        const dados = await response.json();
+        atualizarGrafico(dados);
+        atualizarUmidadeAtual(dados);
+    } catch (error) {
+        console.error('Falha na busca de dados:', error);
+    }
+}
+
+buscarDados();
+setInterval(buscarDados, 20000);
+ss
